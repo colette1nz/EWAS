@@ -1,0 +1,48 @@
+#Code for Epigenome-wide Association Analysis 
+
+ 
+
+#Load libraries 
+library(lme4)  
+library(lmerTest) 
+options(stringsAsFactors=FALSE)  
+#treat strings in a data frame as characters and not as factors by default 
+
+ 
+
+#load data 
+fulldata <-[Read in file with ID, Predictor, Covariates and Methylation all in columns] 
+methdata <-[Read in file with ID and Methylation in columns] 
+
+ 
+
+#normalise methylation data 
+normdataC <-function(x){normdat <-qqnorm(x,plot.it=FALSE) 
+resultnorm <-normdat$x} 
+normdata <-apply(methdata,2,normdataC) 
+
+ 
+
+#linear model function 
+runlinmod <- function(x){ 
+  y <-normdata[,x] 
+  h<-lmer(y~[Predictor] +[Covariates],data=fulldata,na.action=na.omit) 
+  coeff <-summary(h)$coefficients 
+  result <-c(coeff[2,1],coeff[2,2],coeff[2,4],coeff[2,5]) 
+  return(result) 
+} 
+
+ 
+
+modelres <-do.call(cbind,lapply(1:NCOL(normdata),runlinmod)) 
+rownames(modelres) <-c("estimate","S.error","t value","pvalue") 
+colnames(modelres) <-colnames(normdata) 
+
+
+modelresout <-t(modelres) 
+
+ 
+
+write.csv (modelresout, file=[location]) 
+
+ 
