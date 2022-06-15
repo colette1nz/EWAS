@@ -1,0 +1,33 @@
+diet_input<-[Read in file with diet data, visceral fat, covariates and methylation data] 
+M <-diet_input$cg26804336 
+Y <-as.numeric(diet_input$VF) 
+
+ 
+
+#model.0 <-lm(Y~X) 
+
+ 
+
+model.0<-lmer(Y~dqii_score + BMI+ as.factor(smokestatus1) + Age+ (1|KCLfam),data=diet_input) 
+coeff0 <-summary(model.0)$coefficients 
+
+ 
+
+#model.1 <-lm(M~X) 
+meth_model<-lmer(M~dqii_score + BMI+ as.factor(smokestatus1) + Age + (1|KCLfam), 
+data=diet_input) 
+coeff1 <-summary(meth_model)$coefficients 
+
+ 
+
+#model.Y <-lm(Y~X+M) 
+meth_diet_model<-lmer(Y~dqii_score + cg26804336+ BMI+ as.factor(smokestatus1) + Age+ 
+(1|KCLfam),data=diet_input) 
+coeff2 <-summary(meth_diet_model)$coefficients 
+
+ 
+
+library(mediation) 
+results <-mediate(meth_model, meth_diet_model,sims =500,treat="dqii_score", 
+mediator="cg26804336", boot=FALSE) 
+summary(results) 
